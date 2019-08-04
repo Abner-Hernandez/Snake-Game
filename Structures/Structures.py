@@ -21,7 +21,7 @@ class List():
 class ListDE(List):
     def insert(self,elemento):
         nuevo = Nodo(elemento)
-        if self._primero == None:
+        if self._primero is None:
             self._primero = self._ultimo = nuevo
         elif self._primero == self._ultimo:
             self._primero._pSig = nuevo
@@ -32,8 +32,15 @@ class ListDE(List):
             nuevo._pAnt = self._ultimo
             self._ultimo = nuevo
 
+    def insertFirst(self, elemento):
+        nuevo = Nodo(elemento)
+        nuevo._pSig = self._primero
+        self._primero._pAnt = nuevo
+        self._primero = nuevo
+
+        
     def delete(self):
-        if self._primero != None and self._primero != self._ultimo:
+        if self._primero is not None and self._primero != self._ultimo:
             nodoAux = self._ultimo
             self._ultimo = nodoAux._pAnt
             self._ultimo._pSig = None
@@ -43,6 +50,31 @@ class ListDE(List):
             self._primero = None
             self._ultimo = None
             print ("El ultimo elemento de la lista ha sido eliminado")
+
+    def getLastData(self):
+        if self._primero is not None:
+            if self._primero is not None and self._primero != self._ultimo:
+                nodoAux = self._ultimo
+                self._ultimo = nodoAux._pAnt
+                self._ultimo._pSig = None
+                nodoAux._pAnt = None
+                dataReturn = nodoAux.getElemento()
+                del nodoAux
+                return dataReturn
+            elif self._primero == self._ultimo:
+                dataReturn = self._primero.getElemento
+                self._primero = None
+                self._ultimo = None
+                print ("El ultimo elemento de la lista ha sido eliminado")
+                return  dataReturn
+            
+    def buscar(self, elemento):
+        nodoAux = self._primero
+        while nodoAux._pSig is not None:
+            if nodoAux.getElemento == elemento:
+                return True
+            nodoAux = nodoAux._pSig
+        return False
 
     def print(self):
         nodoAux = self._primero
@@ -54,7 +86,7 @@ class ListDE(List):
 class ListCDE(List):
     def insert(self,elemento):
         nuevo = Nodo(elemento)
-        if self._primero == None:
+        if self._primero is None:
             self._primero = self._ultimo = nuevo
         elif self._primero == self._ultimo:
             self._primero._pSig = nuevo
@@ -70,7 +102,7 @@ class ListCDE(List):
             self._ultimo = nuevo
 
     def delete(self):
-        if self._primero != None and self._primero != self._ultimo:
+        if self._primero is not None and self._primero != self._ultimo:
             nodoAux = self._ultimo
             self._ultimo = nodoAux._pAnt
             self._ultimo._pSig = self._primero
@@ -93,7 +125,7 @@ class ListCDE(List):
 class Queue(List):
     def insert(self,elemento):
         nuevo = Nodo(elemento)
-        if self._primero == None:
+        if self._primero is None:
             self._primero = self._ultimo = nuevo
         elif self._primero == self._ultimo:
             self._ultimo = nuevo
@@ -103,7 +135,7 @@ class Queue(List):
             self._ultimo = nuevo
 
     def delete(self):
-        if self._primero != None and self._primero != self._ultimo:
+        if self._primero is not None and self._primero != self._ultimo:
             nodoAux = self._ultimo
             while nodoAux._pSig != self._primero:
                 nodoAux = nodoAux._pSig
@@ -126,7 +158,7 @@ class Queue(List):
 class Stack(List):
     def insert(self,elemento):
         nuevo = Nodo(elemento)
-        if self._primero == None:
+        if self._primero is None:
             self._primero = self._ultimo = nuevo
         elif self._primero == self._ultimo:
             self._ultimo = nuevo
@@ -136,7 +168,7 @@ class Stack(List):
             self._ultimo = nuevo
 
     def delete(self):
-        if self._primero != None and self._primero != self._ultimo:
+        if self._primero is not None and self._primero != self._ultimo:
             nodoAux = self._ultimo
             self._ultimo = self._ultimo._pSig
             del nodoAux
@@ -152,35 +184,3 @@ class Stack(List):
             nodoAux = nodoAux._pSig
         print (nodoAux.getElemento())
 
-listDobleE = ListDE()
-listDobleE.insert([1,2])
-listDobleE.insert([1,2])
-listDobleE.insert([21,2])
-listDobleE.insert([31,2])
-
-listDobleE.print()
-listDobleE.delete()
-listDobleE.print()
-
-pila = Stack()
-pila.insert([1,2])
-pila.insert([3,2])
-pila.insert([21,2])
-pila.insert([31,2])
-
-pila.print()
-pila.delete()
-pila.print()
-
-
-cola = Queue()
-cola.insert([1,2])
-cola.insert([3,2])
-cola.insert([21,2])
-cola.insert([31,2])
-
-cola.print()
-cola.delete()
-cola.print()
-cola.delete()
-cola.print()
