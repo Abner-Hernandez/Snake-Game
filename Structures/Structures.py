@@ -7,6 +7,12 @@ class Nodo():
     def getElemento(self):
         return self._elemento
 
+    def setElemento(self, data, num):
+        if num == 0:
+            self._elemento[0] = data
+        elif num == 1:
+            self._elemento[1] = data
+
 class List():
     def __init__(self):
         self._primero = None
@@ -33,20 +39,30 @@ class ListDE(List):
             self._ultimo = nuevo
 
     def insertFirst(self, elemento):
-        nuevo = Nodo(elemento)
-        nuevo._pSig = self._primero
-        self._primero._pAnt = nuevo
-        self._primero = nuevo
+        if self._primero is not None:
+            nuevo = Nodo(elemento)
+            nuevo._pSig = self._primero
+            self._primero._pAnt = nuevo
+            self._primero = nuevo
+        else:
+            nuevo = Nodo(elemento)
+            self._primero = self._ultimo = nuevo
+
 
         
     def delete(self):
+        print("---------------------------")
+        nodoAux = self._primero
+        while nodoAux is not None:
+            print(nodoAux.getElemento())
+            nodoAux = nodoAux._pSig
         if self._primero is not None and self._primero != self._ultimo:
             nodoAux = self._ultimo
             self._ultimo = nodoAux._pAnt
             self._ultimo._pSig = None
             nodoAux._pAnt = None
             del nodoAux
-        elif self._primero == self._ultimo:
+        elif self._primero == self._ultimo and self._primero is not None:
             self._primero = None
             self._ultimo = None
             print ("El ultimo elemento de la lista ha sido eliminado")
@@ -61,17 +77,17 @@ class ListDE(List):
                 dataReturn = nodoAux.getElemento()
                 del nodoAux
                 return dataReturn
-            elif self._primero == self._ultimo:
-                dataReturn = self._primero.getElemento
+            elif self._primero == self._ultimo and self._primero is not None:
+                dataReturn = self._primero.getElemento()
                 self._primero = None
                 self._ultimo = None
                 print ("El ultimo elemento de la lista ha sido eliminado")
                 return  dataReturn
             
     def buscar(self, elemento):
-        nodoAux = self._primero
-        while nodoAux._pSig is not None:
-            if nodoAux.getElemento == elemento:
+        nodoAux = self._primero._pSig
+        while nodoAux is not None:
+            if nodoAux.getElemento() == elemento:
                 return True
             nodoAux = nodoAux._pSig
         return False
@@ -110,7 +126,7 @@ class ListCDE(List):
             nodoAux._pAnt = None
             nodoAux._pSig = None
             del nodoAux
-        elif self._primero == self._ultimo:
+        elif self._primero == self._ultimo and self._primero is not None:
             self._primero = None
             self._ultimo = None
             print ("El ultimo elemento de la lista ha sido eliminado")
@@ -143,7 +159,7 @@ class Queue(List):
             self._primero = nodoAux
             self._primero._pSig = None
             del nodoAux2
-        elif self._primero == self._ultimo:
+        elif self._primero == self._ultimo and self._primero is not None:
             self._primero = None
             self._ultimo = None
             print ("El ultimo elemento de la lista ha sido eliminado")
@@ -172,7 +188,7 @@ class Stack(List):
             nodoAux = self._ultimo
             self._ultimo = self._ultimo._pSig
             del nodoAux
-        elif self._primero == self._ultimo:
+        elif self._primero == self._ultimo and self._primero is not None:
             self._primero = None
             self._ultimo = None
             print ("El ultimo elemento de la lista ha sido eliminado")
