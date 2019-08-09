@@ -1,5 +1,4 @@
 from Structures import Structures
-users = Structures.ListCDE()
 
 #---------------------------------------------------------------- File
 import tkinter as tk
@@ -29,45 +28,64 @@ userPlaying = None
 snackeElements = Structures.ListDE()
 snackeElementsAux = Structures.ListDE()
 snackeStack = Structures.Stack()
+scoreBoard = Structures.Queue()
+users = Structures.ListCDE()
+pause = False
+nextlvl = False
 score = 0
-
 
 #screen
 sc = curses.initscr()
-h, w = sc.getmaxyx()
-win = curses.newwin(h, w, 0, 0)
-
-win.keypad(1)
 curses.curs_set(0)
 
 curses.start_color()
 curses . init_pair ( 1,curses.COLOR_GREEN , curses.COLOR_BLACK)
+
 curses.noecho()
+h, w = sc.getmaxyx()
+axuH = h
+auxW = w
+win = curses.newwin(h, w, 0, 0)
+win.keypad(1)
 
 def cleanScreen():
     sc.clear()
     sc.refresh()
 
-def play():
-    global snackeElements, snackeStack, snackeElementsAux, score
-    lastKey = curses.KEY_ENTER
+def defaultVars():
+    global  snackeStack, snackeElements, snackeElementsAux, pause, score
+    snackeElements = Structures.ListDE()
+    snackeElementsAux = Structures.ListDE()
+    snackeStack = Structures.Stack()
+    pause = False
     score = 0
-    snakeHead = [10,15]
-    snackeElements.insert([10,5])
-    snackeElements.insert([9,5])
-    snackeElements.insert([8,5])
-    snackF1 = [7,7]
-    snackF2 = [15,30]
+
+def play(velocidad, h, w):
+    global snackeElements, snackeStack, snackeElementsAux, score, pause, sc, scoreBoard, nextlvl
+    sc.clear()
+    sc.refresh()
+    win = curses.newwin(h, w, 0, 0)
+    win.keypad(1)
+
+    #Initial Positions Snake
+    snakeHead = [5,15]
+    snackeElements.insert([5,3])
+    snackeElements.insert([4,3])
+    snackeElements.insert([3,3])
+
+    snackF1 = [random.randint(1,h-2),random.randint(1,w-2)]
+    snackF2 = [random.randint(1,h-2),random.randint(1,w-2)]
 
     # display Food1
     win.addch(snackF1[0], snackF1[1], '+')
 
-        # display Food1
+    # display Food2
     win.addch(snackF2[0], snackF2[1], '*')
 
     lastButtonDireccion = 1
     button_direction = 1
     key = curses.KEY_RIGHT
+    lastKey = curses.KEY_ENTER
 
 
     def collisionWithF1():
@@ -85,6 +103,7 @@ def play():
             sc.refresh()
             time.sleep(2)
             sc.clear()
+            score = 0
             menu()
         return snackF2, score
 
@@ -97,7 +116,7 @@ def play():
 
     while True:
         win.border(0)
-        win.timeout(100)
+        win.timeout(velocidad)
 
         nextKey = win.getch()
 
@@ -141,7 +160,30 @@ def play():
                 key = curses.KEY_RIGHT
             elif lastKey == curses.KEY_RIGHT:
                 key = curses.KEY_LEFT
+        elif key == ord ( 'p' ):
+            pause = True
+            ah = h
+            aw = w
+            menu()
+            h = ah
+            w = aw
+            win = curses.newwin(h, w, 0, 0)
+            win.keypad(1)
+            win.border(0)
+            # display Food1
+            win.addch(snackF1[0], snackF1[1], '+')
 
+            # display Food2
+            win.addch(snackF2[0], snackF2[1], '*')
+
+            if lastKey == curses.KEY_UP:
+                key = curses.KEY_DOWN
+            elif lastKey == curses.KEY_DOWN:
+                key = curses.KEY_UP
+            elif lastKey == curses.KEY_LEFT:
+                key = curses.KEY_RIGHT
+            elif lastKey == curses.KEY_RIGHT:
+                key = curses.KEY_LEFT
         else:
             pass
 
@@ -172,6 +214,7 @@ def play():
             last = list(snackeElements.getLastData())
             win.addch(last[0], last[1], ' ')
             win.addch(snackF2[0], snackF2[1], '*')
+            snackeStack.delete()
         else:
             snackeElements.insertFirst(list(snakeHead))
             last = list(snackeElements.getLastData())
@@ -181,8 +224,16 @@ def play():
         #print(snackeElements._primero.getElemento()[0], snackeElements._primero.getElemento()[1])
         win.addch(snackeElements._primero.getElemento()[0], snackeElements._primero.getElemento()[1], '#')
 
+        if score == 15 and nextlvl is False:
+            nextlvl = True
+            w = int(w*0.7)
+            h = int(h*0.7)
+            snackeElements = Structures.ListDE()
+            play(35, h, w)
+
         # collision
         if collisionWithSelf(snackeElements) == 1:
+            scoreBoard.insert([userPlaying, score])
             break
         elif snakeHead[0]>=h-1 or snakeHead[0]<=0 or snakeHead[1]>=w-1 or snakeHead[1]<=0 :
             if snakeHead[0]>=h-1:
@@ -197,11 +248,67 @@ def play():
             last = list(snackeElements.getLastData())
             win.addch(last[0], last[1], ' ')
 
-    curses.endwin()
+    snackeElements.graphList()
+    snackeStack.graphList()
+    menu()
+
+
+def mesageScreen(mensaje):
+    sc.clear()
+    sc.addstr(12, 40, mensaje , curses.color_pair(1))
+    sc.refresh()
+    time.sleep(3)
+    cleanScreen()
+
+def subMenuReport():
+    global  win
+    win = curses.newwin(h, w, 0, 0)
+    win.keypad(1)
+    sc.clear()
+    sc.border(0)
+    sc.addstr(2, 55, "REPORTS (REPORTES)", curses.color_pair(1))
+    sc.addstr(4, 40, "1.SNAKE REPORT", curses.color_pair(1))
+    sc.addstr(5, 40, "2.SCORE REPORT", curses.color_pair(1))
+    sc.addstr(6, 40, "3.SCOREBOARD REPORT", curses.color_pair(1))
+    sc.addstr(7, 40, "4.USERS REPORT", curses.color_pair(1))
+    sc.addstr(8, 40, "5.RETURN", curses.color_pair(1))
+    while 1:
+        d = sc.getch()
+        if d == ord ( '1' ):
+            if snackeElementsAux._primero is not None:
+                snackeElements.graphList()
+            else:
+                mesageScreen('No hay ninguna posición del Snake')
+                subMenuReport()
+        elif d == ord ( '2' ):
+            if snackeStack._primero is not None:
+                snackeStack.graphList()
+            else:
+                mesageScreen('No hay bocadillos guardados')
+                subMenuReport()
+        elif d == ord ( '3' ):
+            if scoreBoard._primero is not None:
+                scoreBoard.graphList()
+            else:
+                mesageScreen('No hay Scores de Jugadores')
+                subMenuReport()
+        elif d == ord ( '4' ):
+            if users._primero is not None:
+                users.graphList()
+            else:
+                mesageScreen('No hay Jugadores')
+                subMenuReport()
+        elif d == ord ( '5' ):
+            menu()
 
 def menu():
-    global userPlaying
-    sc.border(1)
+    global h, w, userPlaying, pause
+    sc.clear()
+    h, w = sc.getmaxyx()
+    win = curses.newwin(h, w, 0, 0)
+    win.keypad(1)
+
+    sc.border(0)
     sc.addstr(2, 55, "Menu", curses.color_pair(1))
     sc.addstr(4, 40, "1.Play (Jugar)", curses.color_pair(1))
     sc.addstr(5, 40, "2.Scoreboard (Puntuaciones)", curses.color_pair(1))
@@ -213,8 +320,12 @@ def menu():
     while 1:
         c = sc.getch()
         if c == ord ( '1' ):
-            if userPlaying is not None:
-                play()
+            if pause is True:
+                pause = False
+                return
+            elif userPlaying is not None:
+                defaultVars()
+                play(95, h, w)
             else:
                 sc.clear()
                 sc.addstr(4, 40, "Ingrese el nombre del jugador ", curses.color_pair(1))
@@ -224,18 +335,26 @@ def menu():
                 curses.noecho()
                 userPlaying = s
                 users.insert(s)
-                play()
+                defaultVars()
+                play(95, h, w)
                 #newUser = input()
-        if c == ord ( '5' ):
-            selectFile()
-            #sc.refresh()
+        elif c == ord ( '2' ):
+            if scoreBoard._primero is not None:
+                sc.clear()
+                sc.border(0)
+                nodoAux = scoreBoard._primero
+                cont = 4
+                sc.addstr(cont, 40, "Name", curses.color_pair(1))
+                sc.addstr(cont, 75, "Score", curses.color_pair(1))
+
+                while nodoAux is not None:
+                    cont += 1
+                    sc.addstr(cont, 40, nodoAux.getElemento()[0] , curses.color_pair(1))
+                    sc.addstr(cont, 75, nodoAux.getElemento()[1], curses.color_pair(1))
+                    nodoAux = nodoAux._pAnt
         elif c == ord ( '3' ):
             if users._primero is None:
-                sc.clear()
-                sc.addstr(12, 40, 'No Hay ningun usuario Guardado' , curses.color_pair(1))
-                sc.refresh()
-                time.sleep(3)
-                cleanScreen()
+                mesageScreen('No Hay ningun usuario Guardado')
                 menu()
             else:
                 nodoAuxiliar = users._primero
@@ -257,9 +376,12 @@ def menu():
                     elif n == ord ( '0' ):
                         userPlaying = nodoAuxiliar.getElemento
                         break
+        elif c == ord ( '4' ):
+            subMenuReport()
+        elif c == ord ( '5' ):
+            selectFile()
         elif c == ord ( '6' ):
-            break
-        #elif c == ord ( '\n' ) or c == ord ( '\r' ):
-        #    print("enter capturado")
+            curses.endwin()
+            return
 
 menu()

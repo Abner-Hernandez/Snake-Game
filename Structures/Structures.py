@@ -1,3 +1,4 @@
+import subprocess
 class Nodo():
     def __init__(self,elemento):
         self._elemento = elemento
@@ -19,10 +20,20 @@ class List():
         self._ultimo = None
 
     def insert(self,elemento):
-        print("insert")
+        print("Implement Insert Method")
 
     def delete(self):
-        print("delete")
+        print("Implement delete Method")
+
+    def graphList(self):
+        print("Implement graph Method")
+
+    def guardarArchivo(self,cadena, name):
+        file = open(name+".dot", "w")
+        file.write(cadena)
+        file.close()
+        subprocess.run("dot -Tpng "+name+".dot -o "+name+".png", shell=True)
+        subprocess.run(name +".png", shell=True)
 
 class ListDE(List):
     def insert(self,elemento):
@@ -47,11 +58,8 @@ class ListDE(List):
         else:
             nuevo = Nodo(elemento)
             self._primero = self._ultimo = nuevo
-
-
         
     def delete(self):
-        print("---------------------------")
         nodoAux = self._primero
         while nodoAux is not None:
             print(nodoAux.getElemento())
@@ -92,12 +100,40 @@ class ListDE(List):
             nodoAux = nodoAux._pSig
         return False
 
-    def print(self):
+    def graphList(self):
+        cont = 0
+        txtArchivo ="";
+        txtArchivo += "digraph Mass{\n";
+        txtArchivo += "subgraph cluster_0{\n";
+        txtArchivo += "SnakPositions[label = \"SNAKE REPORT\" color = blue style= filled fontcolor = white shape = box];\n";
         nodoAux = self._primero
-        while(nodoAux != self._ultimo):
-            print (nodoAux.getElemento() , "-> " , end="")
+
+        while nodoAux is not None:
+            txtArchivo += "node[shape = record label= "
+            txtArchivo += "\""
+            txtArchivo += "<A0> |"
+            txtArchivo += "(" + str(nodoAux.getElemento()[1]) + "," + str(nodoAux.getElemento()[0]) + ")" +" \n"
+            txtArchivo += "| <A1>"
+            txtArchivo += "\""
+            txtArchivo += "]"+ "nodo" + str(cont) +";\n"
+            cont += 1
             nodoAux = nodoAux._pSig
-        print (nodoAux.getElemento())
+
+        nodoAux = self._primero
+        cont = 0
+        txtArchivo +=  "nodo" + str(cont) + ":A1" +" -> "+ "nodo" + str(cont+1) + ":A0" + "\n"
+        nodoAux = nodoAux._pSig
+        while nodoAux is not None:
+            cont +=1
+            txtArchivo += "nodo" + str(cont) + ":A0" +" -> "+ "nodo" + str(cont-1) + ":A1" +"\n"
+            if nodoAux != self._ultimo:
+                txtArchivo += "nodo" + str(cont) + ":A1" +" -> "+ "nodo" + str(cont+1) + ":A0" + "\n"
+            nodoAux = nodoAux._pSig
+
+        txtArchivo += "color = blue \n}"
+
+        txtArchivo += "\n} "
+        self.guardarArchivo(txtArchivo, "listDE")
 
 class ListCDE(List):
     def insert(self,elemento):
@@ -131,34 +167,65 @@ class ListCDE(List):
             self._ultimo = None
             print ("El ultimo elemento de la lista ha sido eliminado")
 
-    def print(self):
+    def graphList(self):
+        cont = 0
+        txtArchivo ="";
+        txtArchivo += "digraph Mass{\n";
+        txtArchivo += "subgraph cluster_0{\n";
+        txtArchivo += "SnakPositions[label = \"SNAKE REPORT\" color = blue style= filled fontcolor = white shape = box];\n";
         nodoAux = self._primero
-        while(nodoAux != self._ultimo):
-            print (nodoAux.getElemento() , "-> " , end="")
+
+        while nodoAux is not None:
+            txtArchivo += "node[shape = record label= "
+            txtArchivo += "\""
+            txtArchivo += "<A0> |"
+            txtArchivo += "(" + str(nodoAux.getElemento()[1]) + "," + str(nodoAux.getElemento()[0]) + ")" +" \n"
+            txtArchivo += "| <A1>"
+            txtArchivo += "\""
+            txtArchivo += "]"+ "nodo" + str(cont) +";\n"
+            cont += 1
             nodoAux = nodoAux._pSig
-        print (nodoAux.getElemento())
+
+        nodoAux = self._primero
+        cont = 0
+        while nodoAux is not None:
+            txtArchivo += "nodo" + str(cont) + ":A0" +" -> "+ "nodo" + str(cont-1) + ":A1" +"\n"
+            txtArchivo += "nodo" + str(cont) + ":A1" +" -> "+ "nodo" + str(cont+1) + ":A0" + "\n"
+            if nodoAux == self._ultimo:
+                break
+            nodoAux = nodoAux._pSig
+            cont +=1
+
+        txtArchivo += "color = blue \n}"
+
+        txtArchivo += "\n} "
+        self.guardarArchivo(txtArchivo, "listUsers")
 
 class Queue(List):
+    cont = 0
     def insert(self,elemento):
+        self.cont +=1
         nuevo = Nodo(elemento)
         if self._primero is None:
             self._primero = self._ultimo = nuevo
         elif self._primero == self._ultimo:
+            self._primero._pAnt = nuevo
             self._ultimo = nuevo
             self._ultimo._pSig = self._primero
         else:
-            nuevo._pSig = self._ultimo
+            self._ultimo._pSig = nuevo
+            nuevo._pAnt = self._ultimo
             self._ultimo = nuevo
 
     def delete(self):
+        self.cont -=1
         if self._primero is not None and self._primero != self._ultimo:
-            nodoAux = self._ultimo
-            while nodoAux._pSig != self._primero:
-                nodoAux = nodoAux._pSig
-            nodoAux2 = self._primero
+            nodoAux = self._primero._pAnt
+            nodoAuxE = self._primero
+            nodoAux._pSig = None
+            self._primero._pAnt = None
             self._primero = nodoAux
-            self._primero._pSig = None
-            del nodoAux2
+            del nodoAuxE
         elif self._primero == self._ultimo and self._primero is not None:
             self._primero = None
             self._ultimo = None
@@ -170,6 +237,37 @@ class Queue(List):
             print (nodoAux.getElemento() , "-> " , end="")
             nodoAux = nodoAux._pSig
         print (nodoAux.getElemento())
+
+    def graphList(self):
+        cont = 0
+        txtArchivo ="";
+        txtArchivo += "digraph Mass{\n";
+        txtArchivo += "subgraph cluster_0{\n";
+        txtArchivo += "SnakPositions[label = \"SCORE REPORT\" color = blue style= filled fontcolor = white shape = box];\n";
+        nodoAux = self._ultimo
+
+        while nodoAux is not None:
+            txtArchivo += "node[shape = record label= "
+            txtArchivo += "\""
+            txtArchivo += "<A0> |"
+            txtArchivo += "(" + str(nodoAux.getElemento()[1]) + "," + str(nodoAux.getElemento()[0]) + ")" +" \n"
+            txtArchivo += "| <A1>"
+            txtArchivo += "\""
+            txtArchivo += "]"+ "nodo" + str(cont) +";\n"
+            cont += 1
+            nodoAux = nodoAux._pSig
+
+        nodoAux = self._ultimo
+        cont = 0
+        while nodoAux is not None:
+            txtArchivo += "nodo" + str(cont) +" -> "+ "nodo" + str(cont-1) +"\n"
+            nodoAux = nodoAux._pSig
+            cont +=1
+
+        txtArchivo += "color = blue \n}"
+
+        txtArchivo += "\n} "
+        self.guardarArchivo(txtArchivo, "snacks")
 
 class Stack(List):
     def insert(self,elemento):
@@ -200,3 +298,31 @@ class Stack(List):
             nodoAux = nodoAux._pSig
         print (nodoAux.getElemento())
 
+    def graphList(self):
+        cont = 0
+        txtArchivo ="";
+        txtArchivo += "digraph Mass{\n";
+        txtArchivo += "subgraph cluster_0{\n";
+        txtArchivo += "SnakPositions[label = \"SCORE REPORT\" color = blue style= filled fontcolor = white shape = box];\n";
+        nodoAux = self._ultimo
+
+        while nodoAux is not None:
+            txtArchivo += "node[shape = record label= "
+            txtArchivo += "\""
+            txtArchivo += "(" + str(nodoAux.getElemento()[1]) + "," + str(nodoAux.getElemento()[0]) + ")" +" \n"
+            txtArchivo += "\""
+            txtArchivo += "]"+ "nodo" + str(cont) +";\n"
+            cont += 1
+            nodoAux = nodoAux._pSig
+
+        nodoAux = self._ultimo
+        cont = 0
+        while nodoAux is not None:
+            txtArchivo += "nodo" + str(cont) +" -> "+ "nodo" + str(cont+1) +"\n"
+            nodoAux = nodoAux._pSig
+            cont +=1
+
+        txtArchivo += "color = blue \n}"
+
+        txtArchivo += "\n} "
+        self.guardarArchivo(txtArchivo, "score")
