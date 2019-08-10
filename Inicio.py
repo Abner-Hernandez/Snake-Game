@@ -4,11 +4,7 @@ from Structures import Structures
 import tkinter as tk
 from tkinter import filedialog
 
-def selectFile():
-    root = tk.Tk()
-    root.withdraw()
-
-    file_path = filedialog.askopenfilename()
+def selectFile(file_path):
     archivo = open(file_path, "r")
     lines = archivo.readlines()
     try:
@@ -60,6 +56,13 @@ def defaultVars():
     pause = False
     score = 0
 
+def calcRandFood():
+    rand = random.randint(0,100)
+    if rand > 20:
+        return 1    #good food
+    else:
+        return 0    #bad food
+
 def play(velocidad, h, w):
     global snackeElements, snackeStack, snackeElementsAux, score, pause, sc, scoreBoard, nextlvl
     sc.clear()
@@ -73,39 +76,19 @@ def play(velocidad, h, w):
     snackeElements.insert([4,3])
     snackeElements.insert([3,3])
 
-    snackF1 = [random.randint(1,h-2),random.randint(1,w-2)]
-    snackF2 = [random.randint(1,h-2),random.randint(1,w-2)]
+    snakeFood = [random.randint(1,h-2),random.randint(1,w-2)]
+    tipeFood = calcRandFood()
 
-    # display Food1
-    win.addch(snackF1[0], snackF1[1], '+')
-
-    # display Food2
-    win.addch(snackF2[0], snackF2[1], '*')
+    # display Food
+    if tipeFood == 1:
+        win.addch(snakeFood[0], snakeFood[1], '+')
+    else:
+        win.addch(snakeFood[0], snakeFood[1], '*')
 
     lastButtonDireccion = 1
     button_direction = 1
     key = curses.KEY_RIGHT
     lastKey = curses.KEY_ENTER
-
-
-    def collisionWithF1():
-        global score
-        snackF1 = [random.randint(1,h-2),random.randint(1,w-2)]
-        score += 1
-        return snackF1, score
-
-    def collisionWithF2():
-        global score
-        snackF2 = [random.randint(1,h-2),random.randint(1,w-2)]
-        score -= 1
-        if score == -3:
-            sc.addstr(14, 40, 'you lose')
-            sc.refresh()
-            time.sleep(2)
-            sc.clear()
-            score = 0
-            menu()
-        return snackF2, score
 
     def collisionWithSelf(snackeElements):
         snakeHead = list(snackeElements._primero.getElemento())
@@ -170,11 +153,12 @@ def play(velocidad, h, w):
             win = curses.newwin(h, w, 0, 0)
             win.keypad(1)
             win.border(0)
-            # display Food1
-            win.addch(snackF1[0], snackF1[1], '+')
 
-            # display Food2
-            win.addch(snackF2[0], snackF2[1], '*')
+            # display Food
+            if tipeFood == 1:
+                win.addch(snakeFood[0], snakeFood[1], '+')
+            else:
+                win.addch(snakeFood[0], snakeFood[1], '*')
 
             if lastKey == curses.KEY_UP:
                 key = curses.KEY_DOWN
@@ -201,27 +185,42 @@ def play(velocidad, h, w):
 
 
         # Increase or Decrease Snake length on eating food
-        if snakeHead == snackF1:
-            snackF1, score = collisionWithF1()
-            snackeElements.insertFirst(list(snakeHead))
-            snackeStack.insert(snackF1)
-            win.addch(snackF1[0], snackF1[1], '+')
-        elif snakeHead == snackF2:
-            snackF2, score = collisionWithF2()
-            last = list(snackeElements.getLastData())
-            win.addch(last[0], last[1], ' ')
-            snackeElements.insertFirst(list(snakeHead))
-            last = list(snackeElements.getLastData())
-            win.addch(last[0], last[1], ' ')
-            win.addch(snackF2[0], snackF2[1], '*')
-            snackeStack.delete()
+        if snakeHead == snakeFood:
+            if tipeFood == 1:
+                score += 1
+                snackeElements.insertFirst(list(snakeHead))
+                snackeStack.insert(snakeFood)
+            elif tipeFood == 0:
+                score -= 1
+                last = list(snackeElements.getLastData())
+                win.addch(last[0], last[1], ' ')
+                snackeElements.insertFirst(list(snakeHead))
+                last = list(snackeElements.getLastData())
+                win.addch(last[0], last[1], ' ')
+                snackeStack.delete()
+            if score == -3:
+                sc.addstr(14, 40, 'you lose')
+                sc.refresh()
+                time.sleep(2)
+                sc.clear()
+                score = 0
+                menu()
+
+            snakeFood = [random.randint(1,h-2),random.randint(1,w-2)]
+            tipeFood = calcRandFood()
+
+            # display Food
+            if tipeFood == 1:
+                win.addch(snakeFood[0], snakeFood[1], '+')
+            else:
+                win.addch(snakeFood[0], snakeFood[1], '*')
+
         else:
             snackeElements.insertFirst(list(snakeHead))
             last = list(snackeElements.getLastData())
             win.addch(last[0], last[1], ' ')
 
         # show snake
-        #print(snackeElements._primero.getElemento()[0], snackeElements._primero.getElemento()[1])
         win.addch(snackeElements._primero.getElemento()[0], snackeElements._primero.getElemento()[1], '#')
 
         if score == 15 and nextlvl is False:
@@ -373,13 +372,26 @@ def menu():
                         sc.clear()
                         sc.addstr(9, 40, nodoAuxiliar.getElemento() , curses.color_pair(1))
                         sc.refresh()
-                    elif n == ord ( '0' ):
+                    elif n == ord ( 'a' ):
                         userPlaying = nodoAuxiliar.getElemento
-                        break
+                        menu()
         elif c == ord ( '4' ):
             subMenuReport()
         elif c == ord ( '5' ):
-            selectFile()
+            try:
+                sc.clear()
+                sc.addstr(4, 40, "Ingrese el path de los usuarios ", curses.color_pair(1))
+                sc.refresh()
+                curses.echo()
+                s = sc.getstr(6,40, 100)
+                curses.noecho()
+                selectFile(s)
+            except:
+                sc.clear()
+                sc.addstr(12, 40, "Un error a ocurrido ", curses.color_pair(1))
+                sc.refresh()
+                time.sleep(3)
+            menu()
         elif c == ord ( '6' ):
             curses.endwin()
             return

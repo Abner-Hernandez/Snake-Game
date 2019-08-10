@@ -174,27 +174,31 @@ class ListCDE(List):
         txtArchivo += "subgraph cluster_0{\n";
         txtArchivo += "SnakPositions[label = \"SNAKE REPORT\" color = blue style= filled fontcolor = white shape = box];\n";
         nodoAux = self._primero
-
         while nodoAux is not None:
             txtArchivo += "node[shape = record label= "
             txtArchivo += "\""
-            txtArchivo += "<A0> |"
-            txtArchivo += "(" + str(nodoAux.getElemento()[1]) + "," + str(nodoAux.getElemento()[0]) + ")" +" \n"
-            txtArchivo += "| <A1>"
+            txtArchivo +=  str(nodoAux.getElemento())
             txtArchivo += "\""
             txtArchivo += "]"+ "nodo" + str(cont) +";\n"
+            if nodoAux == self._ultimo:
+                break
             cont += 1
             nodoAux = nodoAux._pSig
 
+
         nodoAux = self._primero
-        cont = 0
-        while nodoAux is not None:
-            txtArchivo += "nodo" + str(cont) + ":A0" +" -> "+ "nodo" + str(cont-1) + ":A1" +"\n"
-            txtArchivo += "nodo" + str(cont) + ":A1" +" -> "+ "nodo" + str(cont+1) + ":A0" + "\n"
-            if nodoAux == self._ultimo:
-                break
-            nodoAux = nodoAux._pSig
+        txtArchivo += "nodo" + str(0) +" -> "+ "nodo" + str(1) + "\n"
+        cont = 1
+        nodoAux = nodoAux._pSig
+        while nodoAux != self._ultimo:
+            txtArchivo += "nodo" + str(cont) +" -> "+ "nodo" + str(cont-1) +"\n"
+            txtArchivo += "nodo" + str(cont) +" -> "+ "nodo" + str(cont+1) + "\n"
             cont +=1
+            nodoAux = nodoAux._pSig
+
+        txtArchivo += "nodo" + str(0) +" -> "+ "nodo" + str(cont) +"\n"
+        txtArchivo += "nodo" + str(cont) +" -> "+ "nodo" + str(cont-1) +"\n"
+        txtArchivo += "nodo" + str(cont) +" -> "+ "nodo" + str(0) + "\n"
 
         txtArchivo += "color = blue \n}"
 
