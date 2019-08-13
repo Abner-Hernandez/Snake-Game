@@ -73,7 +73,7 @@ class ListDE(List):
         elif self._primero == self._ultimo and self._primero is not None:
             self._primero = None
             self._ultimo = None
-            print ("El ultimo elemento de la lista ha sido eliminado")
+            #print ("El ultimo elemento de la lista ha sido eliminado")
 
     def getLastData(self):
         if self._primero is not None:
@@ -89,7 +89,7 @@ class ListDE(List):
                 dataReturn = self._primero.getElemento()
                 self._primero = None
                 self._ultimo = None
-                print ("El ultimo elemento de la lista ha sido eliminado")
+                #print ("El ultimo elemento de la lista ha sido eliminado")
                 return  dataReturn
             
     def buscar(self, elemento):
@@ -140,6 +140,10 @@ class ListCDE(List):
         nuevo = Nodo(elemento)
         if self._primero is None:
             self._primero = self._ultimo = nuevo
+            self._ultimo._pSig = self._primero
+            self._ultimo._pAnt = self._primero
+            self._primero._pSig = self._ultimo
+            self._primero._pAnt = self._ultimo
         elif self._primero == self._ultimo:
             self._primero._pSig = nuevo
             self._ultimo._pAnt = nuevo
@@ -165,7 +169,7 @@ class ListCDE(List):
         elif self._primero == self._ultimo and self._primero is not None:
             self._primero = None
             self._ultimo = None
-            print ("El ultimo elemento de la lista ha sido eliminado")
+            #print ("El ultimo elemento de la lista ha sido eliminado")
 
     def graphList(self):
         cont = 0
@@ -233,7 +237,7 @@ class Queue(List):
         elif self._primero == self._ultimo and self._primero is not None:
             self._primero = None
             self._ultimo = None
-            print ("El ultimo elemento de la lista ha sido eliminado")
+            #print ("El ultimo elemento de la lista ha sido eliminado")
 
     def print(self):
         nodoAux = self._ultimo
@@ -293,7 +297,7 @@ class Stack(List):
         elif self._primero == self._ultimo and self._primero is not None:
             self._primero = None
             self._ultimo = None
-            print ("El ultimo elemento de la lista ha sido eliminado")
+            #print ("El ultimo elemento de la lista ha sido eliminado")
 
     def print(self):
         nodoAux = self._ultimo

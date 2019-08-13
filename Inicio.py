@@ -44,6 +44,13 @@ auxW = w
 win = curses.newwin(h, w, 0, 0)
 win.keypad(1)
 
+def mesageScreen(mensaje):
+    sc.clear()
+    sc.addstr(12, 40, mensaje , curses.color_pair(1))
+    sc.refresh()
+    time.sleep(3)
+    cleanScreen()
+
 def cleanScreen():
     sc.clear()
     sc.refresh()
@@ -65,199 +72,196 @@ def calcRandFood():
 
 def play(velocidad, h, w):
     global snackeElements, snackeStack, snackeElementsAux, score, pause, sc, scoreBoard, nextlvl
-    sc.clear()
-    sc.refresh()
-    win = curses.newwin(h, w, 0, 0)
-    win.keypad(1)
+    try:
+        sc.clear()
+        sc.refresh()
+        win = curses.newwin(h, w, 0, 0)
+        win.keypad(1)
 
-    #Initial Positions Snake
-    snakeHead = [5,15]
-    snackeElements.insert([5,3])
-    snackeElements.insert([4,3])
-    snackeElements.insert([3,3])
+        #Initial Positions Snake
+        snakeHead = [5,15]
+        snackeElements.insert([5,3])
+        snackeElements.insert([4,3])
+        snackeElements.insert([3,3])
 
-    snakeFood = [random.randint(1,h-2),random.randint(1,w-2)]
-    tipeFood = calcRandFood()
+        snakeFood = [random.randint(1,h-2),random.randint(1,w-2)]
+        tipeFood = calcRandFood()
 
-    # display Food
-    if tipeFood == 1:
-        win.addch(snakeFood[0], snakeFood[1], '+')
-    else:
-        win.addch(snakeFood[0], snakeFood[1], '*')
-
-    lastButtonDireccion = 1
-    button_direction = 1
-    key = curses.KEY_RIGHT
-    lastKey = curses.KEY_ENTER
-
-    def collisionWithSelf(snackeElements):
-        snakeHead = list(snackeElements._primero.getElemento())
-        if snackeElements.buscar(snakeHead):
-            return 1
+        # display Food
+        if tipeFood == 1:
+            win.addch(snakeFood[0], snakeFood[1], '+')
         else:
-            return 0
+            win.addch(snakeFood[0], snakeFood[1], '*')
 
-    while True:
-        win.border(0)
-        win.timeout(velocidad)
+        lastButtonDireccion = 1
+        button_direction = 1
+        key = curses.KEY_RIGHT
+        lastKey = curses.KEY_ENTER
 
-        nextKey = win.getch()
-
-        if nextKey == -1:
-            key = key
-        else:
-            lastKey = key
-            key = nextKey
-
-        # 0-Left, 1-Right, 3-Up, 2-Down
-        if key == curses.KEY_LEFT and lastButtonDireccion != 1:
-            button_direction = 0
-        elif key == curses.KEY_RIGHT and lastButtonDireccion != 0:
-            button_direction = 1
-        elif key == curses.KEY_UP and lastButtonDireccion != 2:
-            button_direction = 3
-        elif key == curses.KEY_DOWN and lastButtonDireccion != 3:
-            button_direction = 2
-        elif key == ord ( '1' ):
-
-            while snackeElements._primero is not None:
-                snackeElementsAux.insert(snackeElements.getLastData())
-            snackeElements = snackeElementsAux
-            snackeElementsAux = Structures.ListDE()
+        def collisionWithSelf(snackeElements):
             snakeHead = list(snackeElements._primero.getElemento())
+            if snackeElements.buscar(snakeHead):
+                return 1
+            else:
+                return 0
 
-            if button_direction == 1:
-                button_direction = 0
-            elif button_direction == 0:
-                button_direction = 1
-            elif button_direction == 3:
-                button_direction = 2
-            elif button_direction == 2:
-                button_direction = 3
-
-            if lastKey == curses.KEY_UP:
-                key = curses.KEY_DOWN
-            elif lastKey == curses.KEY_DOWN:
-                key = curses.KEY_UP
-            elif lastKey == curses.KEY_LEFT:
-                key = curses.KEY_RIGHT
-            elif lastKey == curses.KEY_RIGHT:
-                key = curses.KEY_LEFT
-        elif key == ord ( 'p' ):
-            pause = True
-            ah = h
-            aw = w
-            menu()
-            h = ah
-            w = aw
-            win = curses.newwin(h, w, 0, 0)
-            win.keypad(1)
+        while True:
             win.border(0)
+            win.timeout(velocidad)
 
-            # display Food
-            if tipeFood == 1:
-                win.addch(snakeFood[0], snakeFood[1], '+')
+            nextKey = win.getch()
+
+            if nextKey == -1:
+                key = key
             else:
-                win.addch(snakeFood[0], snakeFood[1], '*')
+                lastKey = key
+                key = nextKey
 
-            if lastKey == curses.KEY_UP:
-                key = curses.KEY_DOWN
-            elif lastKey == curses.KEY_DOWN:
-                key = curses.KEY_UP
-            elif lastKey == curses.KEY_LEFT:
-                key = curses.KEY_RIGHT
-            elif lastKey == curses.KEY_RIGHT:
-                key = curses.KEY_LEFT
-        else:
-            pass
+            # 0-Left, 1-Right, 3-Up, 2-Down
+            if key == curses.KEY_LEFT and lastButtonDireccion != 1:
+                button_direction = 0
+            elif key == curses.KEY_RIGHT and lastButtonDireccion != 0:
+                button_direction = 1
+            elif key == curses.KEY_UP and lastButtonDireccion != 2:
+                button_direction = 3
+            elif key == curses.KEY_DOWN and lastButtonDireccion != 3:
+                button_direction = 2
+            elif key == ord ( '1' ):
 
-        lastButtonDireccion = button_direction
+                while snackeElements._primero is not None:
+                    snackeElementsAux.insert(snackeElements.getLastData())
+                snackeElements = snackeElementsAux
+                snackeElementsAux = Structures.ListDE()
+                snakeHead = list(snackeElements._primero.getElemento())
 
-        # Change the head position based on the button direction
-        if button_direction == 1:
-            snakeHead[1] += 1
-        elif button_direction == 0:
-            snakeHead[1] -= 1
-        elif button_direction == 2:
-            snakeHead[0] += 1
-        elif button_direction == 3:
-            snakeHead[0] -= 1
+                if button_direction == 1:
+                    button_direction = 0
+                elif button_direction == 0:
+                    button_direction = 1
+                elif button_direction == 3:
+                    button_direction = 2
+                elif button_direction == 2:
+                    button_direction = 3
 
-
-        # Increase or Decrease Snake length on eating food
-        if snakeHead == snakeFood:
-            if tipeFood == 1:
-                score += 1
-                snackeElements.insertFirst(list(snakeHead))
-                snackeStack.insert(snakeFood)
-            elif tipeFood == 0:
-                score -= 1
-                last = list(snackeElements.getLastData())
-                win.addch(last[0], last[1], ' ')
-                snackeElements.insertFirst(list(snakeHead))
-                last = list(snackeElements.getLastData())
-                win.addch(last[0], last[1], ' ')
-                snackeStack.delete()
-            if score == -3:
-                sc.addstr(14, 40, 'you lose')
-                sc.refresh()
-                time.sleep(2)
-                sc.clear()
-                score = 0
+                if lastKey == curses.KEY_UP:
+                    key = curses.KEY_DOWN
+                elif lastKey == curses.KEY_DOWN:
+                    key = curses.KEY_UP
+                elif lastKey == curses.KEY_LEFT:
+                    key = curses.KEY_RIGHT
+                elif lastKey == curses.KEY_RIGHT:
+                    key = curses.KEY_LEFT
+            elif key == ord ( 'p' ):
+                pause = True
+                ah = h
+                aw = w
                 menu()
+                h = ah
+                w = aw
+                win = curses.newwin(h, w, 0, 0)
+                win.keypad(1)
+                win.border(0)
 
-            snakeFood = [random.randint(1,h-2),random.randint(1,w-2)]
-            tipeFood = calcRandFood()
+                # display Food
+                if tipeFood == 1:
+                    win.addch(snakeFood[0], snakeFood[1], '+')
+                else:
+                    win.addch(snakeFood[0], snakeFood[1], '*')
 
-            # display Food
-            if tipeFood == 1:
-                win.addch(snakeFood[0], snakeFood[1], '+')
+                if lastKey == curses.KEY_UP:
+                    key = curses.KEY_DOWN
+                elif lastKey == curses.KEY_DOWN:
+                    key = curses.KEY_UP
+                elif lastKey == curses.KEY_LEFT:
+                    key = curses.KEY_RIGHT
+                elif lastKey == curses.KEY_RIGHT:
+                    key = curses.KEY_LEFT
             else:
-                win.addch(snakeFood[0], snakeFood[1], '*')
+                pass
 
-        else:
-            snackeElements.insertFirst(list(snakeHead))
-            last = list(snackeElements.getLastData())
-            win.addch(last[0], last[1], ' ')
+            lastButtonDireccion = button_direction
 
-        # show snake
-        win.addch(snackeElements._primero.getElemento()[0], snackeElements._primero.getElemento()[1], '#')
-
-        if score == 15 and nextlvl is False:
-            nextlvl = True
-            w = int(w*0.7)
-            h = int(h*0.7)
-            snackeElements = Structures.ListDE()
-            play(35, h, w)
-
-        # collision
-        if collisionWithSelf(snackeElements) == 1:
-            scoreBoard.insert([userPlaying, score])
-            break
-        elif snakeHead[0]>=h-1 or snakeHead[0]<=0 or snakeHead[1]>=w-1 or snakeHead[1]<=0 :
-            if snakeHead[0]>=h-1:
-                snakeHead[0] = 0
-            elif snakeHead[0]<=0:
-                snakeHead[0] = h-1
-            elif snakeHead[1]>=w-1:
-                snakeHead[1] = 0
-            elif snakeHead[1]>=0:
-                snakeHead[1] = w-1
-            snackeElements.insertFirst(list(snakeHead))
-            last = list(snackeElements.getLastData())
-            win.addch(last[0], last[1], ' ')
-
-    snackeElements.graphList()
-    snackeStack.graphList()
-    menu()
+            # Change the head position based on the button direction
+            if button_direction == 1:
+                snakeHead[1] += 1
+            elif button_direction == 0:
+                snakeHead[1] -= 1
+            elif button_direction == 2:
+                snakeHead[0] += 1
+            elif button_direction == 3:
+                snakeHead[0] -= 1
 
 
-def mesageScreen(mensaje):
-    sc.clear()
-    sc.addstr(12, 40, mensaje , curses.color_pair(1))
-    sc.refresh()
-    time.sleep(3)
-    cleanScreen()
+            # Increase or Decrease Snake length on eating food
+            if snakeHead == snakeFood:
+                if tipeFood == 1:
+                    score += 1
+                    snackeElements.insertFirst(list(snakeHead))
+                    snackeStack.insert(snakeFood)
+                elif tipeFood == 0:
+                    score -= 1
+                    last = list(snackeElements.getLastData())
+                    win.addch(last[0], last[1], ' ')
+                    snackeElements.insertFirst(list(snakeHead))
+                    last = list(snackeElements.getLastData())
+                    win.addch(last[0], last[1], ' ')
+                    snackeStack.delete()
+                if score == -3:
+                    sc.addstr(14, 40, 'you lose')
+                    sc.refresh()
+                    time.sleep(2)
+                    sc.clear()
+                    score = 0
+                    menu()
+
+                snakeFood = [random.randint(1,h-2),random.randint(1,w-2)]
+                tipeFood = calcRandFood()
+
+                # display Food
+                if tipeFood == 1:
+                    win.addch(snakeFood[0], snakeFood[1], '+')
+                else:
+                    win.addch(snakeFood[0], snakeFood[1], '*')
+
+            else:
+                snackeElements.insertFirst(list(snakeHead))
+                last = list(snackeElements.getLastData())
+                win.addch(last[0], last[1], ' ')
+
+            # show snake
+            win.addch(snackeElements._primero.getElemento()[0], snackeElements._primero.getElemento()[1], '#')
+
+            if score == 15 and nextlvl is False:
+                nextlvl = True
+                w = int(w*0.7)
+                h = int(h*0.7)
+                snackeElements = Structures.ListDE()
+                play(35, h, w)
+
+            # collision
+            if collisionWithSelf(snackeElements) == 1:
+                scoreBoard.insert([userPlaying, score])
+                break
+            elif snakeHead[0]>=h-1 or snakeHead[0]<=0 or snakeHead[1]>=w-1 or snakeHead[1]<=0 :
+                if snakeHead[0]>=h-1:
+                    snakeHead[0] = 0
+                elif snakeHead[0]<=0:
+                    snakeHead[0] = h-1
+                elif snakeHead[1]>=w-1:
+                    snakeHead[1] = 0
+                elif snakeHead[1]>=0:
+                    snakeHead[1] = w-1
+                snackeElements.insertFirst(list(snakeHead))
+                last = list(snackeElements.getLastData())
+                win.addch(last[0], last[1], ' ')
+
+        snackeElements.graphList()
+        snackeStack.graphList()
+        menu()
+    except:
+        mesageScreen("An Error")
+        defaultVars()
+        menu()
 
 def subMenuReport():
     global  win
@@ -300,8 +304,12 @@ def subMenuReport():
         elif d == ord ( '5' ):
             menu()
 
+import sys
+def finishGame():
+    sys.exit()
+
 def menu():
-    global h, w, userPlaying, pause
+    global h, w, userPlaying, pause, scoreBoard
     sc.clear()
     h, w = sc.getmaxyx()
     win = curses.newwin(h, w, 0, 0)
@@ -349,10 +357,21 @@ def menu():
                 while nodoAux is not None:
                     cont += 1
                     sc.addstr(cont, 40, nodoAux.getElemento()[0] , curses.color_pair(1))
-                    sc.addstr(cont, 75, nodoAux.getElemento()[1], curses.color_pair(1))
+                    sc.addstr(cont, 75, str(nodoAux.getElemento()[1]), curses.color_pair(1))
                     nodoAux = nodoAux._pAnt
+
+                sc.refresh()
+                time.sleep(5)
+                menu()
+            else:
+                sc.clear()
+                time.sleep(2)
+                mesageScreen('No Hay Registros')
+                menu()
         elif c == ord ( '3' ):
             if users._primero is None:
+                sc.clear()
+                time.sleep(2)
                 mesageScreen('No Hay ningun usuario Guardado')
                 menu()
             else:
@@ -373,7 +392,7 @@ def menu():
                         sc.addstr(9, 40, nodoAuxiliar.getElemento() , curses.color_pair(1))
                         sc.refresh()
                     elif n == ord ( 'a' ):
-                        userPlaying = nodoAuxiliar.getElemento
+                        userPlaying = nodoAuxiliar.getElemento()
                         menu()
         elif c == ord ( '4' ):
             subMenuReport()
@@ -393,7 +412,9 @@ def menu():
                 time.sleep(3)
             menu()
         elif c == ord ( '6' ):
-            curses.endwin()
+            finishGame()
             return
 
 menu()
+
+
