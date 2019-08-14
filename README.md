@@ -7,8 +7,9 @@ email: abner18enero@gmail.com<br>
 
 
 #### Description
-Instrucciones:
-para desplazar entre los usuarios existentes se realiza con las teclas 'w' y 's' para seleccionarlo la tecla 'a'.
-para que cambie de direccion el snake la tecla '1'
-para mover el snake las flechas
-El juego casi terminado...
+Instructions:
+Move snake: the arrow keys
+Change direction: key '1'
+Change user selection: keys 'w' and 's'
+Select user: key 'a'
+Game pause: key 'p'

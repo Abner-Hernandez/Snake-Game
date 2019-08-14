@@ -247,31 +247,23 @@ class Queue(List):
         print (nodoAux.getElemento())
 
     def graphList(self):
-        cont = 0
         txtArchivo ="";
         txtArchivo += "digraph Mass{\n";
         txtArchivo += "subgraph cluster_0{\n";
         txtArchivo += "SnakPositions[label = \"SCORE REPORT\" color = blue style= filled fontcolor = white shape = box];\n";
         nodoAux = self._ultimo
 
+        txtArchivo += "node[shape = record label= "
+        txtArchivo += "\""
+        txtArchivo += "(" + str(nodoAux.getElemento()[0])  + "," + str(nodoAux.getElemento()[1]) + ")"
+        print(nodoAux.getElemento()[0] )
+        nodoAux = nodoAux._pSig
         while nodoAux is not None:
-            txtArchivo += "node[shape = record label= "
-            txtArchivo += "\""
-            txtArchivo += "<A0> |"
-            txtArchivo += "(" + str(nodoAux.getElemento()[1]) + "," + str(nodoAux.getElemento()[0]) + ")" +" \n"
-            txtArchivo += "| <A1>"
-            txtArchivo += "\""
-            txtArchivo += "]"+ "nodo" + str(cont) +";\n"
-            cont += 1
+            txtArchivo += " | (" + str(nodoAux.getElemento()[0])  + "," + str(nodoAux.getElemento()[1]) + ")"
             nodoAux = nodoAux._pSig
 
-        nodoAux = self._ultimo
-        cont = 0
-        while nodoAux is not None:
-            txtArchivo += "nodo" + str(cont) +" -> "+ "nodo" + str(cont-1) +"\n"
-            nodoAux = nodoAux._pSig
-            cont +=1
-
+        txtArchivo += "\""
+        txtArchivo += "] nodo \n"
         txtArchivo += "color = blue \n}"
 
         txtArchivo += "\n} "
@@ -307,28 +299,24 @@ class Stack(List):
         print (nodoAux.getElemento())
 
     def graphList(self):
-        cont = 0
         txtArchivo ="";
         txtArchivo += "digraph Mass{\n";
         txtArchivo += "subgraph cluster_0{\n";
         txtArchivo += "SnakPositions[label = \"SCORE REPORT\" color = blue style= filled fontcolor = white shape = box];\n";
         nodoAux = self._ultimo
 
+        txtArchivo += "node[shape = record label= "
+        txtArchivo += "\""
+
+        txtArchivo += "(" + str(nodoAux.getElemento()[1]) + "," + str(nodoAux.getElemento()[0]) + ")"
+        nodoAux = nodoAux._pSig
+
         while nodoAux is not None:
-            txtArchivo += "node[shape = record label= "
-            txtArchivo += "\""
-            txtArchivo += "(" + str(nodoAux.getElemento()[1]) + "," + str(nodoAux.getElemento()[0]) + ")" +" \n"
-            txtArchivo += "\""
-            txtArchivo += "]"+ "nodo" + str(cont) +";\n"
-            cont += 1
+            txtArchivo += " | (" + str(nodoAux.getElemento()[1]) + "," + str(nodoAux.getElemento()[0]) + ")"
             nodoAux = nodoAux._pSig
 
-        nodoAux = self._ultimo
-        cont = 0
-        while nodoAux is not None:
-            txtArchivo += "nodo" + str(cont) +" -> "+ "nodo" + str(cont+1) +"\n"
-            nodoAux = nodoAux._pSig
-            cont +=1
+        txtArchivo += "\""
+        txtArchivo += "] nodo \n"
 
         txtArchivo += "color = blue \n}"
 

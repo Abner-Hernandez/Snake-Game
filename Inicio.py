@@ -7,9 +7,15 @@ from tkinter import filedialog
 def selectFile(file_path):
     archivo = open(file_path, "r")
     lines = archivo.readlines()
+
+    if lines[0].lower() != 'usuario':
+        users.insert(lines[0])
+
+    cont = 1
     try:
-        for user in lines:
-            users.insert(user)
+        while cont < len(lines):
+            users.insert(lines[cont])
+            cont += 1
         archivo.close()
     except:
         print ("Error")
@@ -64,14 +70,18 @@ def defaultVars():
     score = 0
 
 def calcRandFood():
-    rand = random.randint(0,100)
-    if rand > 20:
+    prob = random.randint(0,100)
+    if prob > 20:
         return 1    #good food
     else:
         return 0    #bad food
 
+def calcRandPosition(maxNum):
+    nrandom = maxNum -2
+    return random.randint(1,nrandom)
+
 def play(velocidad, h, w):
-    global snackeElements, snackeStack, snackeElementsAux, score, pause, sc, scoreBoard, nextlvl
+    global snackeElements, snackeStack, snackeElementsAux, score, pause, sc, scoreBoard, nextlvl, userPlaying
     try:
         sc.clear()
         sc.refresh()
@@ -84,7 +94,7 @@ def play(velocidad, h, w):
         snackeElements.insert([4,3])
         snackeElements.insert([3,3])
 
-        snakeFood = [random.randint(1,h-2),random.randint(1,w-2)]
+        snakeFood = [calcRandPosition(h),calcRandPosition(w)]
         tipeFood = calcRandFood()
 
         # display Food
@@ -108,7 +118,10 @@ def play(velocidad, h, w):
         while True:
             win.border(0)
             win.timeout(velocidad)
-
+            win.addstr(0,2, "  User: " )
+            win.addstr(0,10, userPlaying )
+            win.addstr(0,50, "  Score:     " )
+            win.addstr(0,60, str(score) )
             nextKey = win.getch()
 
             if nextKey == -1:
@@ -156,6 +169,10 @@ def play(velocidad, h, w):
                 ah = h
                 aw = w
                 menu()
+                if pause is True:
+                    defaultVars()
+                    userPlaying = None
+                    return
                 h = ah
                 w = aw
                 win = curses.newwin(h, w, 0, 0)
@@ -212,9 +229,9 @@ def play(velocidad, h, w):
                     time.sleep(2)
                     sc.clear()
                     score = 0
-                    menu()
+                    return
 
-                snakeFood = [random.randint(1,h-2),random.randint(1,w-2)]
+                snakeFood = [calcRandPosition(h),calcRandPosition(w)]
                 tipeFood = calcRandFood()
 
                 # display Food
@@ -241,6 +258,8 @@ def play(velocidad, h, w):
             # collision
             if collisionWithSelf(snackeElements) == 1:
                 scoreBoard.insert([userPlaying, score])
+                defaultVars()
+                userPlaying = None
                 break
             elif snakeHead[0]>=h-1 or snakeHead[0]<=0 or snakeHead[1]>=w-1 or snakeHead[1]<=0 :
                 if snakeHead[0]>=h-1:
@@ -257,14 +276,16 @@ def play(velocidad, h, w):
 
         snackeElements.graphList()
         snackeStack.graphList()
-        menu()
+        return
     except:
         mesageScreen("An Error")
+        scoreBoard.insert([userPlaying, score])
         defaultVars()
-        menu()
+        userPlaying = None
+        return
 
 def subMenuReport():
-    global  win
+    global  win, snackeStack, snackeElements
     win = curses.newwin(h, w, 0, 0)
     win.keypad(1)
     sc.clear()
@@ -278,7 +299,7 @@ def subMenuReport():
     while 1:
         d = sc.getch()
         if d == ord ( '1' ):
-            if snackeElementsAux._primero is not None:
+            if snackeElements._primero is not None:
                 snackeElements.graphList()
             else:
                 mesageScreen('No hay ninguna posición del Snake')
@@ -302,29 +323,26 @@ def subMenuReport():
                 mesageScreen('No hay Jugadores')
                 subMenuReport()
         elif d == ord ( '5' ):
-            menu()
-
-import sys
-def finishGame():
-    sys.exit()
+            return
 
 def menu():
     global h, w, userPlaying, pause, scoreBoard
-    sc.clear()
     h, w = sc.getmaxyx()
     win = curses.newwin(h, w, 0, 0)
-    win.keypad(1)
-
-    sc.border(0)
-    sc.addstr(2, 55, "Menu", curses.color_pair(1))
-    sc.addstr(4, 40, "1.Play (Jugar)", curses.color_pair(1))
-    sc.addstr(5, 40, "2.Scoreboard (Puntuaciones)", curses.color_pair(1))
-    sc.addstr(6, 40, "3.User selection (Usuarios)", curses.color_pair(1))
-    sc.addstr(7, 40, "4.Reports (reportes)", curses.color_pair(1))
-    sc.addstr(8, 40, "5.Bulk loading (carga masiva)", curses.color_pair(1))
-    sc.addstr(9, 40, "6.Exit", curses.color_pair(1))
 
     while 1:
+        sc.clear()
+        win.keypad(1)
+        sc.border(0)
+        sc.addstr(2, 55, "Menu", curses.color_pair(1))
+        sc.addstr(4, 40, "1.Play (Jugar)", curses.color_pair(1))
+        sc.addstr(5, 40, "2.Scoreboard (Puntuaciones)", curses.color_pair(1))
+        sc.addstr(6, 40, "3.User selection (Usuarios)", curses.color_pair(1))
+        sc.addstr(7, 40, "4.Reports (reportes)", curses.color_pair(1))
+        sc.addstr(8, 40, "5.Bulk loading (carga masiva)", curses.color_pair(1))
+        sc.addstr(9, 40, "6.Exit", curses.color_pair(1))
+        sc.refresh()
+
         c = sc.getch()
         if c == ord ( '1' ):
             if pause is True:
@@ -340,8 +358,8 @@ def menu():
                 curses.echo()
                 s = sc.getstr(6,40, 15)
                 curses.noecho()
-                userPlaying = s
-                users.insert(s)
+                userPlaying = s.decode("utf-8")
+                users.insert(userPlaying)
                 defaultVars()
                 play(95, h, w)
                 #newUser = input()
@@ -362,18 +380,15 @@ def menu():
 
                 sc.refresh()
                 time.sleep(5)
-                menu()
             else:
                 sc.clear()
                 time.sleep(2)
                 mesageScreen('No Hay Registros')
-                menu()
         elif c == ord ( '3' ):
             if users._primero is None:
                 sc.clear()
                 time.sleep(2)
                 mesageScreen('No Hay ningun usuario Guardado')
-                menu()
             else:
                 nodoAuxiliar = users._primero
                 sc.clear()
@@ -393,7 +408,7 @@ def menu():
                         sc.refresh()
                     elif n == ord ( 'a' ):
                         userPlaying = nodoAuxiliar.getElemento()
-                        menu()
+                        break
         elif c == ord ( '4' ):
             subMenuReport()
         elif c == ord ( '5' ):
@@ -410,9 +425,8 @@ def menu():
                 sc.addstr(12, 40, "Un error a ocurrido ", curses.color_pair(1))
                 sc.refresh()
                 time.sleep(3)
-            menu()
         elif c == ord ( '6' ):
-            finishGame()
+            curses.endwin()
             return
 
 menu()
